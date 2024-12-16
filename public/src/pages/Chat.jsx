@@ -14,17 +14,21 @@ export default function Chat() {
   const [contacts, setContacts] = useState([]);
   const [currentChat, setCurrentChat] = useState(undefined);
   const [currentUser, setCurrentUser] = useState(undefined);
-  useEffect(async () => {
-    if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
-      navigate("/login");
-    } else {
-      setCurrentUser(
-        await JSON.parse(
-          localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-        )
-      );
-    }
-  }, []);
+
+  // Retrieve the current user from localStorage and redirect if not found
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const storedUser = localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY);
+      if (!storedUser) {
+        navigate("/login");
+      } else {
+        setCurrentUser(JSON.parse(storedUser));
+      }
+    };
+    fetchCurrentUser();
+  }, [navigate]);
+
+  // Initialize socket connection and register the user
   useEffect(() => {
     if (currentUser) {
       socket.current = io(host);
@@ -32,19 +36,30 @@ export default function Chat() {
     }
   }, [currentUser]);
 
-  useEffect(async () => {
-    if (currentUser) {
-      if (currentUser.isAvatarImageSet) {
-        const data = await axios.get(`${allUsersRoute}/${currentUser._id}`);
-        setContacts(data.data);
-      } else {
-        navigate("/setAvatar");
+  // Fetch contacts if the user has set an avatar, else redirect to avatar setup
+  useEffect(() => {
+    const fetchContacts = async () => {
+      try {
+        if (currentUser) {
+          if (currentUser.isAvatarImageSet) {
+            const { data } = await axios.get(`${allUsersRoute}/${currentUser._id}`);
+            setContacts(data);
+          } else {
+            navigate("/setAvatar");
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch contacts:", error);
       }
-    }
-  }, [currentUser]);
+    };
+    fetchContacts();
+  }, [currentUser, navigate]);
+
+  // Handle chat selection
   const handleChatChange = (chat) => {
     setCurrentChat(chat);
   };
+
   return (
     <>
       <Container>

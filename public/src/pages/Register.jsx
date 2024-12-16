@@ -16,25 +16,29 @@ export default function Register() {
     draggable: true,
     theme: "dark",
   };
+
   const [values, setValues] = useState({
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
+    role: "",  // New role field
+    info: "",  // New info field
   });
 
   useEffect(() => {
     if (localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
-      navigate("/");
+      navigate("/"); // navigate is used inside useEffect
     }
-  }, []);
+  }, [navigate]);
 
   const handleChange = (event) => {
     setValues({ ...values, [event.target.name]: event.target.value });
   };
 
   const handleValidation = () => {
-    const { password, confirmPassword, username, email } = values;
+    const { password, confirmPassword, username, email, role, info } = values;
+
     if (password !== confirmPassword) {
       toast.error(
         "Password and confirm password should be same.",
@@ -56,6 +60,12 @@ export default function Register() {
     } else if (email === "") {
       toast.error("Email is required.", toastOptions);
       return false;
+    } else if (role === "") {
+      toast.error("Role is required.", toastOptions);
+      return false;
+    } else if (info === "") {
+      toast.error("Info is required.", toastOptions);
+      return false;
     }
 
     return true;
@@ -64,11 +74,13 @@ export default function Register() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (handleValidation()) {
-      const { email, username, password } = values;
+      const { email, username, password, role, info } = values;
       const { data } = await axios.post(registerRoute, {
         username,
         email,
         password,
+        role,
+        info,
       });
 
       if (data.status === false) {
@@ -90,7 +102,7 @@ export default function Register() {
         <form action="" onSubmit={(event) => handleSubmit(event)}>
           <div className="brand">
             <img src={Logo} alt="logo" />
-            <h1>snappy</h1>
+            <h1>BIT CONNECT</h1>
           </div>
           <input
             type="text"
@@ -116,6 +128,22 @@ export default function Register() {
             name="confirmPassword"
             onChange={(e) => handleChange(e)}
           />
+          <select
+            name="role"
+            onChange={(e) => handleChange(e)}
+            value={values.role}
+          >
+            <option value="">Select Role</option>
+            <option value="student">Student</option>
+            <option value="teacher">Teacher</option>
+          </select>
+          <input
+            type="text"
+            placeholder="Additional Info"
+            name="info"
+            onChange={(e) => handleChange(e)}
+            value={values.info}
+          />
           <button type="submit">Create User</button>
           <span>
             Already have an account ? <Link to="/login">Login.</Link>
@@ -136,6 +164,7 @@ const FormContainer = styled.div`
   gap: 1rem;
   align-items: center;
   background-color: #131324;
+
   .brand {
     display: flex;
     align-items: center;
@@ -158,7 +187,9 @@ const FormContainer = styled.div`
     border-radius: 2rem;
     padding: 3rem 5rem;
   }
-  input {
+
+  input,
+  select {
     background-color: transparent;
     padding: 1rem;
     border: 0.1rem solid #4e0eff;
@@ -171,6 +202,7 @@ const FormContainer = styled.div`
       outline: none;
     }
   }
+
   button {
     background-color: #4e0eff;
     color: white;
@@ -185,6 +217,7 @@ const FormContainer = styled.div`
       background-color: #4e0eff;
     }
   }
+
   span {
     color: white;
     text-transform: uppercase;

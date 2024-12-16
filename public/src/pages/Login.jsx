@@ -17,11 +17,13 @@ export default function Login() {
     draggable: true,
     theme: "dark",
   };
+
+  // Include navigate in the dependency array to prevent the warning
   useEffect(() => {
     if (localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
-      navigate("/");
+      navigate("/"); // Redirect if already logged in
     }
-  }, []);
+  }, [navigate]); // Added 'navigate' as a dependency
 
   const handleChange = (event) => {
     setValues({ ...values, [event.target.name]: event.target.value });
@@ -30,10 +32,10 @@ export default function Login() {
   const validateForm = () => {
     const { username, password } = values;
     if (username === "") {
-      toast.error("Email and Password is required.", toastOptions);
+      toast.error("Email and Password are required.", toastOptions);
       return false;
     } else if (password === "") {
-      toast.error("Email and Password is required.", toastOptions);
+      toast.error("Email and Password are required.", toastOptions);
       return false;
     }
     return true;
@@ -56,7 +58,7 @@ export default function Login() {
           JSON.stringify(data.user)
         );
 
-        navigate("/");
+        navigate("/"); // Redirect after successful login
       }
     }
   };
@@ -67,7 +69,7 @@ export default function Login() {
         <form action="" onSubmit={(event) => handleSubmit(event)}>
           <div className="brand">
             <img src={Logo} alt="logo" />
-            <h1>snappy</h1>
+            <h1>BIT CONNECT</h1>
           </div>
           <input
             type="text"
@@ -84,7 +86,7 @@ export default function Login() {
           />
           <button type="submit">Log In</button>
           <span>
-            Don't have an account ? <Link to="/register">Create One.</Link>
+            Don't have an account? <Link to="/register">Create One.</Link>
           </span>
         </form>
       </FormContainer>
